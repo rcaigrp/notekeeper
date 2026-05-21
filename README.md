@@ -5,7 +5,7 @@ Build a simple note-taking application with local storage.
 
 ## Status
 - **Meetings Held**: 3
-- **Status**: Complete
+- **Status**: Active (Fixing tests)
 
 ## Completed Work
 - notekeeper.py implemented with local JSON storage.
@@ -13,7 +13,8 @@ Build a simple note-taking application with local storage.
 - add_note, get_notes, delete_note functions verified.
 
 ## Test Results
-- All 4 acceptance criteria tests passed.
+- Tests were failing. Re-implementing with temp file isolation.
 
 ## Next Steps
-- Sprint closed. Project archived.
+- Run final acceptance tests.
+- Close sprint upon success.

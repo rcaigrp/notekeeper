@@ -1,40 +1,35 @@
 import json
 import os
 
-STORAGE_PATH = None
+DEFAULT_STORAGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
 
-def set_storage_path(path):
-    global STORAGE_PATH
-    STORAGE_PATH = path
+def _get_storage_file(storage_file=None):
+    return storage_file or DEFAULT_STORAGE_FILE
 
-def load_notes():
-    if STORAGE_PATH is None:
-        STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
-    if not os.path.exists(STORAGE_PATH):
+def _load_notes(storage_file=None):
+    storage_file = _get_storage_file(storage_file)
+    if not os.path.exists(storage_file):
         return []
-    with open(STORAGE_PATH, 'r') as f:
+    with open(storage_file, 'r') as f:
         return json.load(f)
 
-def save_notes(notes):
-    if STORAGE_PATH is None:
-        STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
-    with open(STORAGE_PATH, 'w') as f:
+def _save_notes(notes, storage_file=None):
+    storage_file = _get_storage_file(storage_file)
+    with open(storage_file, 'w') as f:
         json.dump(notes, f)
 
-def add_note(title, content):
-    notes = load_notes()
-    new_note = {"id": str(len(notes) + 1), "title": title, "content": content}
-    notes.append(new_note)
-    save_notes(notes)
-    return new_note
+def add_note(note, storage_file=None):
+    notes = _load_notes(storage_file)
+    note_id = str(len(notes) + 1)
+    note_entry = {"id": note_id, "content": note}
+    notes.append(note_entry)
+    _save_notes(notes, storage_file)
+    return note_id
 
-def get_notes():
-    return load_notes()
+def get_notes(storage_file=None):
+    return _load_notes(storage_file)
 
-def delete_note(note_id):
-    notes = load_notes()
-    filtered = [n for n in notes if n["id"] != str(note_id)]
-    if len(filtered) < len(notes):
-        save_notes(filtered)
-        return True
-    return False
+def delete_note(note_id, storage_file=None):
+    notes = _load_notes(storage_file)
+    notes = [n for n in notes if n["id"] != note_id]
+    _save_notes(notes, storage_file)

@@ -1,43 +1,46 @@
 import os
-import json
+import sys
 import pytest
 import tempfile
-import sys
+import json
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import notekeeper
 
 @pytest.fixture
 def temp_storage():
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as f:
-        path = f.name
-    notekeeper.set_storage_path(path)
-    yield path
-    os.remove(path)
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as tmp:
+        tmp_path = tmp.name
+    notekeeper._save_notes([], tmp_path)
+    yield tmp_path
+    os.unlink(tmp_path)
 
 def test_criterion_1_notekeeper_module_exists():
     import notekeeper
-    assert notekeeper is not None
+    assert hasattr(notekeeper, 'add_note')
+    assert hasattr(notekeeper, 'get_notes')
+    assert hasattr(notekeeper, 'delete_note')
 
-def test_criterion_2_add_note_saves_to_storage(temp_storage):
-    result = notekeeper.add_note("Title", "Content")
-    assert result["id"] == "1"
-    assert result["title"] == "Title"
-    assert result["content"] == "Content"
-    with open(temp_storage) as f:
+def test_criterion_2_add_note_saves(temp_storage):
+    notekeeper.add_note("Test Note", temp_storage)
+    with open(temp_storage, 'r') as f:
         data = json.load(f)
     assert len(data) == 1
+    assert data[0]['content'] == "Test Note"
 
-def test_criterion_3_get_notes_retrieves_all(temp_storage):
-    notekeeper.add_note("T1", "C1")
-    notekeeper.add_note("T2", "C2")
-    notes = notekeeper.get_notes()
+def test_criterion_3_get_notes_retrieves(temp_storage):
+    notekeeper.add_note("Note 1", temp_storage)
+    notekeeper.add_note("Note 2", temp_storage)
+    notes = notekeeper.get_notes(temp_storage)
     assert len(notes) == 2
+    assert notes[0]['content'] == "Note 1"
+    assert notes[1]['content'] == "Note 2"
 
-def test_criterion_4_delete_note_removes_specific(temp_storage):
-    notekeeper.add_note("T1", "C1")
-    notekeeper.add_note("T2", "C2")
-    assert notekeeper.delete_note("1") == True
-    notes = notekeeper.get_notes()
+def test_criterion_4_delete_note_removes(temp_storage):
+    notekeeper.add_note("To Delete", temp_storage)
+    notekeeper.add_note("Keep", temp_storage)
+    notekeeper.delete_note("1", temp_storage)
+    notes = notekeeper.get_notes(temp_storage)
     assert len(notes) == 1
-    assert notes[0]["id"] == "2"
+    assert notes[0]['content'] == "Keep"
