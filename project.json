@@ -7,6 +7,6 @@
     "delete_note function removes a specific note by ID"
   ],
   "meeting_budget": 4,
-  "meetings_held": 0,
+  "meetings_held": 1,
   "status": "active"
 }
