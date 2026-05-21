@@ -7,3 +7,7 @@ Sprint opened for NoteKeeper. Implemented notekeeper.py with local JSON storage 
 ## Turn 1 — Manager (2026-05-21 12:52 UTC)
 
 Fixed path mismatch in acceptance_tests.py where STORAGE_PATH pointed to the parent directory instead of the module directory. Tests now align with notekeeper.py's storage location and will be executed.
+
+## Turn 2 — Manager (2026-05-21 12:53 UTC)
+
+Running final acceptance tests for NoteKeeper to confirm all criteria pass. Updating README.md and project.json to mark the project as complete.
