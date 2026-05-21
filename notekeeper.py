@@ -1,37 +1,40 @@
 import json
 import os
 
-STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
+STORAGE_PATH = None
 
-def _load():
+def set_storage_path(path):
+    global STORAGE_PATH
+    STORAGE_PATH = path
+
+def load_notes():
+    if STORAGE_PATH is None:
+        STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
     if not os.path.exists(STORAGE_PATH):
         return []
-    with open(STORAGE_PATH, "r") as f:
-        try:
-            return json.load(f)
-        except Exception:
-            return []
+    with open(STORAGE_PATH, 'r') as f:
+        return json.load(f)
 
-def _save(data):
-    with open(STORAGE_PATH, "w") as f:
-        json.dump(data, f)
+def save_notes(notes):
+    if STORAGE_PATH is None:
+        STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
+    with open(STORAGE_PATH, 'w') as f:
+        json.dump(notes, f)
 
-def add_note(note_id, content):
-    data = _load()
-    for item in data:
-        if item["id"] == note_id:
-            return False
-    data.append({"id": note_id, "content": content})
-    _save(data)
-    return True
+def add_note(title, content):
+    notes = load_notes()
+    new_note = {"id": str(len(notes) + 1), "title": title, "content": content}
+    notes.append(new_note)
+    save_notes(notes)
+    return new_note
 
 def get_notes():
-    return _load()
+    return load_notes()
 
 def delete_note(note_id):
-    data = _load()
-    new_data = [n for n in data if n["id"] != note_id]
-    if len(new_data) < len(data):
-        _save(new_data)
+    notes = load_notes()
+    filtered = [n for n in notes if n["id"] != str(note_id)]
+    if len(filtered) < len(notes):
+        save_notes(filtered)
         return True
     return False
