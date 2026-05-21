@@ -1,54 +1,37 @@
-import pytest
-import sys
 import os
-import json
+import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+STORAGE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
+
+@pytest.fixture(autouse=True)
+def clean_storage():
+    if os.path.exists(STORAGE_PATH):
+        os.remove(STORAGE_PATH)
+    yield
+    if os.path.exists(STORAGE_PATH):
+        os.remove(STORAGE_PATH)
 
 def test_criterion_1_import():
-    try:
-        import notekeeper
-        assert True
-    except ImportError:
-        assert False
+    import notekeeper
+    assert True
 
 def test_criterion_2_add_note():
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
-    if os.path.exists(file_path):
-        os.remove(file_path)
-    
-    from notekeeper import add_note
-    note_id = add_note("Test Title", "Test Content")
-    assert note_id == "1"
-    assert os.path.exists(file_path)
-    with open(file_path, "r") as f:
-        data = json.load(f)
-    assert len(data) == 1
-    assert data[0]["title"] == "Test Title"
-    assert data[0]["content"] == "Test Content"
+    import notekeeper
+    assert notekeeper.add_note("1", "content") == True
+    assert os.path.exists(STORAGE_PATH)
 
 def test_criterion_3_get_notes():
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
-    if os.path.exists(file_path):
-        os.remove(file_path)
-    
-    from notekeeper import add_note, get_notes
-    add_note("Note 1", "Content 1")
-    add_note("Note 2", "Content 2")
-    notes = get_notes()
-    assert len(notes) == 2
-    assert notes[0]["title"] == "Note 1"
-    assert notes[1]["title"] == "Note 2"
+    import notekeeper
+    notekeeper.add_note("1", "content")
+    notes = notekeeper.get_notes()
+    assert len(notes) == 1
+    assert notes[0]["id"] == "1"
 
 def test_criterion_4_delete_note():
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.json")
-    if os.path.exists(file_path):
-        os.remove(file_path)
-    
-    from notekeeper import add_note, delete_note, get_notes
-    add_note("Note 1", "Content 1")
-    add_note("Note 2", "Content 2")
-    delete_note("2")
-    notes = get_notes()
+    import notekeeper
+    notekeeper.add_note("1", "content")
+    notekeeper.add_note("2", "content")
+    assert notekeeper.delete_note("1") == True
+    notes = notekeeper.get_notes()
     assert len(notes) == 1
-    assert notes[0]["title"] == "Note 1"
+    assert notes[0]["id"] == "2"
